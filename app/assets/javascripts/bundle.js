@@ -262,14 +262,49 @@ var _react = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 
 var _react2 = _interopRequireDefault(_react);
 
+var _reactRouterDom = __webpack_require__(/*! react-router-dom */ "./node_modules/react-router-dom/es/index.js");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var Greeting = function Greeting() {
-  return _react2.default.createElement(
-    'h3',
-    null,
-    'Greetings'
-  );
+var Greeting = function Greeting(_ref) {
+  var currentUser = _ref.currentUser,
+      logout = _ref.logout;
+
+  var personalGreeting = function personalGreeting() {
+    return _react2.default.createElement(
+      'div',
+      null,
+      _react2.default.createElement(
+        'h3',
+        null,
+        'Greetings ',
+        currentUser.username
+      ),
+      _react2.default.createElement(
+        'button',
+        { onClick: logout },
+        'Logout'
+      )
+    );
+  };
+
+  var sessionLinks = function sessionLinks() {
+    return _react2.default.createElement(
+      'div',
+      null,
+      _react2.default.createElement(
+        _reactRouterDom.Link,
+        { replace: true, to: '/signup' },
+        'Sign Up'
+      ),
+      _react2.default.createElement(
+        _reactRouterDom.Link,
+        { replace: true, to: '/login' },
+        'Log In'
+      )
+    );
+  };
+  return currentUser ? personalGreeting() : sessionLinks();
 };
 
 exports.default = Greeting;
@@ -309,7 +344,11 @@ var mapStateToProps = function mapStateToProps(_ref) {
 };
 
 var mapDispatchToProps = function mapDispatchToProps(dispatch) {
-  return {};
+  return {
+    logout: function logout() {
+      return dispatch((0, _session_actions.logout)());
+    }
+  };
 };
 
 exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(_greeting2.default);
