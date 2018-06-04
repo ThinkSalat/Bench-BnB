@@ -167,6 +167,10 @@ var signup = exports.signup = function signup(user) {
 "use strict";
 
 
+var _react = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+
+var _react2 = _interopRequireDefault(_react);
+
 var _reactDom = __webpack_require__(/*! react-dom */ "./node_modules/react-dom/index.js");
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
@@ -190,7 +194,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // TESTING END
 
   var root = document.getElementById('root');
-  _reactDom2.default.render(React.createElement(_root2.default, { store: store }), root);
+  _reactDom2.default.render(_react2.default.createElement(_root2.default, { store: store }), root);
 });
 
 /***/ }),
@@ -213,6 +217,10 @@ var _react = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 
 var _react2 = _interopRequireDefault(_react);
 
+var _greeting_container = __webpack_require__(/*! ./greeting/greeting_container */ "./frontend/components/greeting/greeting_container.js");
+
+var _greeting_container2 = _interopRequireDefault(_greeting_container);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var App = function App() {
@@ -220,14 +228,91 @@ var App = function App() {
     'div',
     null,
     _react2.default.createElement(
-      'h1',
+      'header',
       null,
-      'Bench BnB'
+      _react2.default.createElement(
+        'h1',
+        null,
+        'Bench BnB'
+      ),
+      _react2.default.createElement(_greeting_container2.default, null)
     )
   );
 };
 
 exports.default = App;
+
+/***/ }),
+
+/***/ "./frontend/components/greeting/greeting.jsx":
+/*!***************************************************!*\
+  !*** ./frontend/components/greeting/greeting.jsx ***!
+  \***************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Greeting = function Greeting() {
+  return _react2.default.createElement(
+    'h3',
+    null,
+    'Greetings'
+  );
+};
+
+exports.default = Greeting;
+
+/***/ }),
+
+/***/ "./frontend/components/greeting/greeting_container.js":
+/*!************************************************************!*\
+  !*** ./frontend/components/greeting/greeting_container.js ***!
+  \************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _greeting = __webpack_require__(/*! ./greeting */ "./frontend/components/greeting/greeting.jsx");
+
+var _greeting2 = _interopRequireDefault(_greeting);
+
+var _reactRedux = __webpack_require__(/*! react-redux */ "./node_modules/react-redux/es/index.js");
+
+var _session_actions = __webpack_require__(/*! ../../actions/session_actions */ "./frontend/actions/session_actions.js");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var mapStateToProps = function mapStateToProps(_ref) {
+  var entities = _ref.entities,
+      session = _ref.session;
+  return {
+    currentUser: entities.users[session.id]
+  };
+};
+
+var mapDispatchToProps = function mapDispatchToProps(dispatch) {
+  return {};
+};
+
+exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(_greeting2.default);
 
 /***/ }),
 
@@ -240,6 +325,10 @@ exports.default = App;
 
 "use strict";
 
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
 var _react = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 
@@ -267,6 +356,8 @@ var Root = function Root(_ref) {
     )
   );
 };
+
+exports.default = Root;
 
 /***/ }),
 
