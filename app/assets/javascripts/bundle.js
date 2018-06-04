@@ -99,7 +99,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.signup = exports.logout = exports.login = exports.RECEIVE_ERRORS = exports.LOGOUT_CURRENT_USER = exports.RECEIVE_CURRENT_USER = undefined;
+exports.logout = exports.login = exports.signup = exports.receiveErrors = exports.logoutCurrentUser = exports.receiveCurrentUser = exports.RECEIVE_SESSION_ERRORS = exports.LOGOUT_CURRENT_USER = exports.RECEIVE_CURRENT_USER = undefined;
 
 var _session_api_util = __webpack_require__(/*! ../util/session_api_util */ "./frontend/util/session_api_util.js");
 
@@ -109,48 +109,52 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 var RECEIVE_CURRENT_USER = exports.RECEIVE_CURRENT_USER = 'RECEIVE_CURRENT_USER';
 var LOGOUT_CURRENT_USER = exports.LOGOUT_CURRENT_USER = 'LOGOUT_CURRENT_USER';
-var RECEIVE_ERRORS = exports.RECEIVE_ERRORS = 'RECEIVE_ERRORS';
+var RECEIVE_SESSION_ERRORS = exports.RECEIVE_SESSION_ERRORS = 'RECEIVE_SESSION_ERRORS';
 
-var receiveCurrentUser = function receiveCurrentUser(currentUser) {
+var receiveCurrentUser = exports.receiveCurrentUser = function receiveCurrentUser(currentUser) {
   return {
     type: RECEIVE_CURRENT_USER,
-    user: currentUser
+    currentUser: currentUser
   };
 };
 
-var logoutCurrentUser = function logoutCurrentUser() {
+var logoutCurrentUser = exports.logoutCurrentUser = function logoutCurrentUser() {
   return {
     type: LOGOUT_CURRENT_USER
   };
 };
 
-var receiveErrors = function receiveErrors(errors) {
+var receiveErrors = exports.receiveErrors = function receiveErrors(errors) {
   return {
-    type: RECEIVE_ERRORS,
+    type: RECEIVE_SESSION_ERRORS,
     errors: errors
+  };
+};
+
+var signup = exports.signup = function signup(user) {
+  return function (dispatch) {
+    return APIUtil.signup(user).then(function (user) {
+      return dispatch(receiveCurrentUser(user));
+    }, function (err) {
+      return dispatch(receiveErrors(err.responseJSON));
+    });
   };
 };
 
 var login = exports.login = function login(user) {
   return function (dispatch) {
-    APIUtil.login(user).then(function (currentUser) {
-      return dispatch(receiveCurrentUser(currentUser));
+    return APIUtil.login(user).then(function (user) {
+      return dispatch(receiveCurrentUser(user));
+    }, function (err) {
+      return dispatch(receiveErrors(err.responseJSON));
     });
   };
 };
 
 var logout = exports.logout = function logout() {
   return function (dispatch) {
-    APIUtil.logout().then(function () {
+    return APIUtil.logout().then(function (user) {
       return dispatch(logoutCurrentUser());
-    });
-  };
-};
-
-var signup = exports.signup = function signup(user) {
-  return function (dispatch) {
-    APIUtil.signup(user).then(function (currentUser) {
-      return dispatch(receiveCurrentUser(currentUser));
     });
   };
 };
@@ -175,24 +179,38 @@ var _reactDom = __webpack_require__(/*! react-dom */ "./node_modules/react-dom/i
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
-var _store = __webpack_require__(/*! ./store/store */ "./frontend/store/store.js");
-
-var _store2 = _interopRequireDefault(_store);
-
 var _root = __webpack_require__(/*! ./components/root */ "./frontend/components/root.jsx");
 
 var _root2 = _interopRequireDefault(_root);
 
+var _store = __webpack_require__(/*! ./store/store */ "./frontend/store/store.js");
+
+var _store2 = _interopRequireDefault(_store);
+
+var _session_api_util = __webpack_require__(/*! ./util/session_api_util */ "./frontend/util/session_api_util.js");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+//Components
+
+
 document.addEventListener('DOMContentLoaded', function () {
-  var store = (0, _store2.default)();
-
-  // TESTING START
+  var store = void 0;
+  if (window.currentUser) {
+    var preloadedState = {
+      session: { id: window.currentUser.id },
+      entities: {
+        users: _defineProperty({}, window.currentUser.id, window.currentUser)
+      }
+    };
+    store = (0, _store2.default)(preloadedState);
+    delete window.currentUser;
+  } else {
+    store = (0, _store2.default)();
+  }
   window.getState = store.getState;
-  window.dispatch = store.dispatch;
-  // TESTING END
-
+  window.login = _session_api_util.login;
   var root = document.getElementById('root');
   _reactDom2.default.render(_react2.default.createElement(_root2.default, { store: store }), root);
 });
@@ -516,24 +534,20 @@ Object.defineProperty(exports, "__esModule", {
 
 var _session_actions = __webpack_require__(/*! ../actions/session_actions */ "./frontend/actions/session_actions.js");
 
-var _lodash = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
-
-var sessionErrorsReducer = function sessionErrorsReducer() {
-  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+exports.default = function () {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
   var action = arguments[1];
 
   Object.freeze(state);
   switch (action.type) {
     case _session_actions.RECEIVE_SESSION_ERRORS:
-      return (0, _lodash.merge)({}, state, action.errors);
+      return action.errors;
     case _session_actions.RECEIVE_CURRENT_USER:
-      return {};
+      return [];
     default:
       return state;
   }
 };
-
-exports.default = sessionErrorsReducer;
 
 /***/ }),
 
@@ -553,9 +567,9 @@ Object.defineProperty(exports, "__esModule", {
 
 var _session_actions = __webpack_require__(/*! ../actions/session_actions */ "./frontend/actions/session_actions.js");
 
-var _nullSession = {
+var _nullSession = Object.freeze({
   id: null
-};
+});
 
 var sessionReducer = function sessionReducer() {
   var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : _nullSession;
@@ -564,8 +578,7 @@ var sessionReducer = function sessionReducer() {
   Object.freeze(state);
   switch (action.type) {
     case _session_actions.RECEIVE_CURRENT_USER:
-      console.log("id", action.user.id);
-      return { id: action.user.id };
+      return { id: action.currentUser.id };
     case _session_actions.LOGOUT_CURRENT_USER:
       return _nullSession;
     default:
@@ -666,26 +679,26 @@ exports.default = configureStore;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-var signup = exports.signup = function signup(user) {
+var login = exports.login = function login(user) {
   return $.ajax({
-    method: "POST",
-    url: 'api/users',
+    method: 'POST',
+    url: '/api/session',
     data: { user: user }
   });
 };
 
-var login = exports.login = function login(user) {
+var signup = exports.signup = function signup(user) {
   return $.ajax({
-    method: "POST",
-    url: 'api/session',
+    method: 'POST',
+    url: '/api/user',
     data: { user: user }
   });
 };
 
 var logout = exports.logout = function logout() {
   return $.ajax({
-    method: "DELETE",
-    url: 'api/session'
+    method: 'DELETE',
+    url: '/api/session'
   });
 };
 
